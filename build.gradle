@@ -1,0 +1,71 @@
+plugins {
+	id 'org.springframework.boot' version '2.1.9.RELEASE'
+	id 'io.spring.dependency-management' version '1.0.8.RELEASE'
+	id 'java'
+	id 'nu.studer.jooq' version '3.0.2'
+}
+
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '1.8'
+
+repositories {
+	mavenCentral()
+	mavenLocal()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-batch'
+	runtimeOnly 'mysql:mysql-connector-java'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.batch:spring-batch-test'
+	compileOnly 'org.projectlombok:lombok:1.18.6'
+	annotationProcessor 'org.projectlombok:lombok:1.18.6'
+
+	implementation 'com.google.dagger:dagger:2.15'
+	annotationProcessor 'com.google.dagger:dagger-compiler:2.15'
+
+	compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.47'
+	jooqRuntime group: 'mysql', name: 'mysql-connector-java', version: '5.1.47'
+	//jooq関連のjarを追加
+	compile group: 'org.jooq', name: 'jooq', version: '3.11.2'
+	compile group: 'org.jooq', name: 'jooq-parent', version: '3.11.2'/*, ext: 'pom'*/
+	compile group: 'org.jooq', name: 'jooq-meta', version: '3.11.2'
+	compile group: 'org.jooq', name: 'jooq-meta-extensions', version: '3.11.2'
+	compile group: 'org.jooq', name: 'jooq-codegen', version: '3.11.2'
+	compile group: 'org.jooq', name: 'jooq-codegen-maven', version: '3.11.2'
+}
+
+jooq {
+	//jooqのバージョンを指定
+	version = '3.11.2'
+	edition = 'OSS'
+	tables(sourceSets.main) {
+		jdbc {
+			//データベースドライバの完全修飾クラス名
+			driver = 'com.mysql.jdbc.Driver'
+			//SQLに接続するためのURL
+			url = 'jdbc:mysql://localhost:3306/Hoge?serverTimezone=JST'
+			//データベースにログインするためのユーザ名
+			user = 'user'
+			//データベースにログインするためのパスワード
+			password = 'password'
+		}
+		generator {
+			name = 'org.jooq.codegen.DefaultGenerator'
+			database {
+				//対象とするデータベースを表すクラス名(後述)
+				name = 'org.jooq.meta.mysql.MySQLDatabase'
+				inputSchema = ''
+				includes = '.*'
+				excludes = ''
+			}
+			target {
+				//生成されるコードのパッケージ名
+				packageName = 'jooq'
+				//生成されるコードを配置するディレクトリ
+				directory = 'src/main/java'
+			}
+		}
+	}
+}
